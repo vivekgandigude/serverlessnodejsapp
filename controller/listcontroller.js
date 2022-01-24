@@ -86,6 +86,176 @@ class ListController {
         });
     });
   };
+  getNextListItems = (req, res, next) => {
+    let url =
+      getItemUrl +
+      "$filter=ID gt '" +
+      req.query.pid +
+      "'&$top=" +
+      req.query.top;
+
+    this.getListAccesToken().then((response) => {
+      get(url, {
+        headers: {
+          Authorization: "Bearer " + response,
+          Accept: "application/json;odata=verbose",
+          "Content-Type": "application/json;odata=verbose",
+        },
+      })
+        .then((response1) => {
+          return res.status(200).json(response1.data.d);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    });
+  };
+
+  getListItemCount = (req, res, next) => {
+    this.getListAccesToken().then((response) => {
+      get(baseListUrl, {
+        headers: {
+          Authorization: "Bearer " + response,
+          Accept: "application/json;odata=verbose",
+          "Content-Type": "application/json;odata=verbose",
+        },
+      })
+        .then((response1) => {
+          return res.status(200).json(response1.data.d);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    });
+  };
+  getTestListItems = (req, res, next) => {
+    let limit = req.query.limit;
+
+    this.getListAccesToken().then((response) => {
+      get(
+        "https://winwireinc.sharepoint.com/sites/GileadKite/_api/web/lists/GetByTitle('SalesRecords')/items?limit=" +
+          limit,
+        {
+          headers: {
+            Authorization: "Bearer " + response,
+            Accept: "application/json;odata=verbose",
+            "Content-Type": "application/json;odata=verbose",
+          },
+        }
+      )
+        .then((response1) => {
+          return res.status(200).json(response1.data.d);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    });
+  };
+  getAllTestListItem = (req, res, next) => {
+    let r = req;
+    this.getListAccesToken().then((response) => {
+      get(createItemUrl + "(" + req.query.id + ")", {
+        headers: {
+          Authorization: "Bearer " + response,
+          Accept: "application/json;odata=verbose",
+          "Content-Type": "application/json;odata=verbose",
+        },
+      })
+        .then((response1) => {
+          let data = response1.data;
+          //console.log(response1.data);
+          return res.status(200).json(response1.data.d);
+          //return response1.data.d;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    });
+  };
+  createListItem = async (req, res, next) => {
+    console.log(req.body);
+
+    this.getListAccesToken().then((response) => {
+      post(
+        createItemUrl,
+        {
+          __metadata: {
+            type: "SP.Data.SalesRecordsListItem",
+          },
+          Title: req.body.title,
+          field_1: req.body.country,
+          field_2: req.body.itemtype,
+          field_3: req.body.saleschannel,
+        },
+        {
+          headers: {
+            Authorization: "Bearer " + response,
+            Accept: "application/json;odata=verbose",
+            "Content-Type": "application/json;odata=verbose",
+          },
+        }
+      )
+        .then((response1) => {
+          console.log(response1);
+          return res.status(200).json(response1.data.d);
+        })
+        .catch((error) => {
+          console.log("error");
+        });
+    });
+  };
+  updateListItem = async (request, res, next) => {
+    console.log(request.query);
+    console.log(request.body);
+    this.getListAccesToken().then((response) => {
+      post(
+        updateUrl + "/getItemById(" + request.query.id + ")",
+        {
+          __metadata: {
+            type: "SP.Data.SalesRecordsListItem",
+          },
+          Title: request.body.title,
+          field_1: request.body.country,
+          field_2: request.body.itemtype,
+          field_3: request.body.saleschannel,
+        },
+        {
+          headers: {
+            Authorization: "Bearer " + response,
+            Accept: "application/json;odata=verbose",
+            "Content-Type": "application/json;odata=verbose",
+            "If-Match": "*",
+            "X-HTTP-Method": "MERGE",
+          },
+        }
+      )
+        .then((response1) => {
+          return res.status(200).json(response1.data);
+        })
+        .catch((error) => {
+          console.log("error");
+        });
+    });
+  };
+  deleteListItem = async (request, res, next) => {
+    console.log(request.query.id);
+    this.getListAccesToken().then((response) => {
+      axios
+        .delete(createItemUrl + "(" + request.query.id + ")", {
+          headers: {
+            Authorization: "Bearer " + response,
+            Accept: "application/json;odata=verbose",
+            "If-Match": "*",
+          },
+        })
+        .then((response1) => {
+          return res.status(200).json(response1.statusText);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    });
+  };
 }
 const listController = new ListController();
 module.exports = listController;

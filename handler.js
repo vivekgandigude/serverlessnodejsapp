@@ -27,7 +27,7 @@ app.get("/api", (req, res, next) => {
 
 app.get("/getAllItems", (req, res, next) => {
   listController.getAllItems(req.body, (results) => {
-    //console.log(res.json({ results: results }));
+    
     res.json({ results: results });
   });
 });
